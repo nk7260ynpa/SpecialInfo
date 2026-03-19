@@ -13,6 +13,9 @@ from fastapi import FastAPI
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
+from src.routers.bitcoin import router as bitcoin_router
+from src.routers.currency import router as currency_router
+from src.routers.gold import router as gold_router
 from src.routers.oil import router as oil_router
 
 # 設定 logging
@@ -31,6 +34,9 @@ app = FastAPI(title="特殊資訊 Dashboard", version="1.0.0")
 
 # 註冊 API 路由
 app.include_router(oil_router)
+app.include_router(gold_router)
+app.include_router(bitcoin_router)
+app.include_router(currency_router)
 
 
 @app.get("/api/health")

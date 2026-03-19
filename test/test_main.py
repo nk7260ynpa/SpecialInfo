@@ -41,3 +41,33 @@ class TestRouteRegistered:
         """健康檢查路由應存在。"""
         routes = [r.path for r in app.routes]
         assert "/api/health" in routes
+
+    def test_gold_route_exists(self, client):
+        """黃金價格路由應存在。"""
+        routes = [r.path for r in app.routes]
+        assert "/api/specialinfo/gold" in routes
+
+    def test_gold_latest_route_exists(self, client):
+        """黃金最新價格路由應存在。"""
+        routes = [r.path for r in app.routes]
+        assert "/api/specialinfo/gold/latest" in routes
+
+    def test_bitcoin_route_exists(self, client):
+        """比特幣價格路由應存在。"""
+        routes = [r.path for r in app.routes]
+        assert "/api/specialinfo/bitcoin" in routes
+
+    def test_bitcoin_latest_route_exists(self, client):
+        """比特幣最新價格路由應存在。"""
+        routes = [r.path for r in app.routes]
+        assert "/api/specialinfo/bitcoin/latest" in routes
+
+    def test_currency_route_exists(self, client):
+        """匯率路由應存在。"""
+        routes = [r.path for r in app.routes]
+        assert "/api/specialinfo/currency" in routes
+
+    def test_currency_latest_route_exists(self, client):
+        """匯率最新價格路由應存在。"""
+        routes = [r.path for r in app.routes]
+        assert "/api/specialinfo/currency/latest" in routes

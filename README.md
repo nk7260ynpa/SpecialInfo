@@ -1,13 +1,15 @@
 # SpecialInfo
 
-特殊資訊 Dashboard — 展示國際金融商品走勢（原油價格等）。
+特殊資訊 Dashboard — 展示國際金融商品走勢（原油、黃金、比特幣、貨幣匯率等）。
 
 ## 功能
 
-- WTI 原油價格走勢與最新報價
-- Brent 原油價格走勢與最新報價
+- WTI / Brent 原油價格走勢與最新報價
+- 黃金價格走勢與最新報價
+- 比特幣價格走勢與最新報價
+- 美元/台幣、日圓/台幣匯率走勢與最新報價
 - 收盤價折線圖（近 30 天）
-- 卡片式佈局，可擴展更多金融商品
+- 分區卡片式佈局（大宗商品、匯率）
 
 ## 專案架構
 
@@ -24,10 +26,16 @@ SpecialInfo/
 │   ├── main.py               # FastAPI 主程式
 │   ├── routers/
 │   │   ├── __init__.py
-│   │   └── oil.py            # 原油價格 API 路由
+│   │   ├── oil.py            # 原油價格 API 路由
+│   │   ├── gold.py           # 黃金價格 API 路由
+│   │   ├── bitcoin.py        # 比特幣價格 API 路由
+│   │   └── currency.py       # 匯率 API 路由
 │   └── services/
 │       ├── __init__.py
-│       └── oil_service.py    # 原油價格資料查詢服務
+│       ├── oil_service.py    # 原油價格資料查詢服務
+│       ├── gold_service.py   # 黃金價格資料查詢服務
+│       ├── bitcoin_service.py # 比特幣價格資料查詢服務
+│       └── currency_service.py # 匯率資料查詢服務
 ├── frontend/
 │   ├── package.json
 │   ├── vite.config.js
@@ -38,11 +46,15 @@ SpecialInfo/
 │       ├── main.jsx
 │       ├── index.css
 │       └── components/
-│           └── OilPriceCard.jsx  # 原油價格卡片元件
+│           ├── OilPriceCard.jsx  # 原油價格卡片元件
+│           └── PriceCard.jsx     # 通用價格卡片元件
 ├── test/
 │   ├── __init__.py
 │   ├── test_main.py          # 主程式測試
-│   └── test_oil.py           # 原油 API 測試
+│   ├── test_oil.py           # 原油 API 測試
+│   ├── test_gold.py          # 黃金 API 測試
+│   ├── test_bitcoin.py       # 比特幣 API 測試
+│   └── test_currency.py      # 匯率 API 測試
 ├── logs/
 │   └── .gitkeep
 ├── .gitignore
@@ -96,6 +108,12 @@ pytest test/ -v
 | GET | `/api/health` | 健康檢查 |
 | GET | `/api/specialinfo/oil?days=30` | 查詢最近 N 天原油價格（WTI + Brent），days 範圍 1-365 |
 | GET | `/api/specialinfo/oil/latest` | 查詢最新一筆原油價格（WTI + Brent） |
+| GET | `/api/specialinfo/gold?days=30` | 查詢最近 N 天黃金價格，days 範圍 1-365 |
+| GET | `/api/specialinfo/gold/latest` | 查詢最新一筆黃金價格 |
+| GET | `/api/specialinfo/bitcoin?days=30` | 查詢最近 N 天比特幣價格，days 範圍 1-365 |
+| GET | `/api/specialinfo/bitcoin/latest` | 查詢最新一筆比特幣價格 |
+| GET | `/api/specialinfo/currency?days=30` | 查詢最近 N 天匯率（USDTWD + JPYTWD），days 範圍 1-365 |
+| GET | `/api/specialinfo/currency/latest` | 查詢最新一筆匯率（USDTWD + JPYTWD） |
 
 ### 回應範例
 
@@ -128,27 +146,92 @@ pytest test/ -v
 }
 ```
 
-#### GET /api/specialinfo/oil/latest
+#### GET /api/specialinfo/gold?days=7
 
 ```json
 {
-  "wti": {
+  "gold": [
+    {
+      "date": "2026-03-01",
+      "product": "Gold",
+      "open": 2050.30,
+      "high": 2065.50,
+      "low": 2048.00,
+      "close": 2060.10,
+      "volume": 180000
+    }
+  ]
+}
+```
+
+#### GET /api/specialinfo/bitcoin?days=7
+
+```json
+{
+  "bitcoin": [
+    {
+      "date": "2026-03-01",
+      "product": "Bitcoin",
+      "open": 85000.50,
+      "high": 87200.00,
+      "low": 84500.00,
+      "close": 86800.25,
+      "volume": 25000000000
+    }
+  ]
+}
+```
+
+#### GET /api/specialinfo/currency?days=7
+
+```json
+{
+  "usdtwd": [
+    {
+      "date": "2026-03-01",
+      "product": "USDTWD",
+      "open": 32.5100,
+      "high": 32.6200,
+      "low": 32.4800,
+      "close": 32.5500,
+      "volume": 0
+    }
+  ],
+  "jpytwd": [
+    {
+      "date": "2026-03-01",
+      "product": "JPYTWD",
+      "open": 0.2135,
+      "high": 0.2142,
+      "low": 0.2130,
+      "close": 0.2140,
+      "volume": 0
+    }
+  ]
+}
+```
+
+#### GET /api/specialinfo/currency/latest
+
+```json
+{
+  "usdtwd": {
     "date": "2026-03-01",
-    "product": "WTI",
-    "open": 68.50,
-    "high": 69.20,
-    "low": 68.10,
-    "close": 69.00,
-    "volume": 350000
+    "product": "USDTWD",
+    "open": 32.5100,
+    "high": 32.6200,
+    "low": 32.4800,
+    "close": 32.5500,
+    "volume": 0
   },
-  "brent": {
+  "jpytwd": {
     "date": "2026-03-01",
-    "product": "Brent",
-    "open": 72.30,
-    "high": 73.00,
-    "low": 72.00,
-    "close": 72.80,
-    "volume": 280000
+    "product": "JPYTWD",
+    "open": 0.2135,
+    "high": 0.2142,
+    "low": 0.2130,
+    "close": 0.2140,
+    "volume": 0
   }
 }
 ```
@@ -156,14 +239,22 @@ pytest test/ -v
 ## 資料庫
 
 - **Database**: `SPECIAL_INFO`
-- **Table**: `OilPrice`
-  - `Date` — 日期
-  - `Product` — 產品名稱（WTI / Brent）
-  - `Open` — 開盤價
-  - `High` — 最高價
-  - `Low` — 最低價
-  - `Close` — 收盤價
-  - `Volume` — 成交量
+- **Table**: `OilPrice` — 原油價格（WTI / Brent）
+- **Table**: `GoldPrice` — 黃金價格（Gold）
+- **Table**: `BitcoinPrice` — 比特幣價格（Bitcoin）
+- **Table**: `CurrencyPrice` — 匯率（USDTWD / JPYTWD）
+
+各 Table 欄位相同：
+
+| 欄位 | 說明 |
+|------|------|
+| Date | 日期 |
+| Product | 產品名稱 |
+| Open | 開盤價 |
+| High | 最高價 |
+| Low | 最低價 |
+| Close | 收盤價 |
+| Volume | 成交量 |
 
 ## 環境變數
 
