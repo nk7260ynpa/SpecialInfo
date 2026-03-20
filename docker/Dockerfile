@@ -15,6 +15,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY pyproject.toml .
 COPY src/ src/
+COPY test/ test/
 RUN pip install --no-cache-dir .
 
 COPY --from=frontend-builder /app/frontend/dist /app/static

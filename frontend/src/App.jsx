@@ -20,6 +20,11 @@ function App() {
   const [bitcoinLoading, setBitcoinLoading] = useState(true)
   const [bitcoinError, setBitcoinError] = useState(null)
 
+  // 股市指數
+  const [indicesData, setIndicesData] = useState({ dowjones: [], nasdaq: [] })
+  const [indicesLoading, setIndicesLoading] = useState(true)
+  const [indicesError, setIndicesError] = useState(null)
+
   // 匯率
   const [currencyData, setCurrencyData] = useState({ usdtwd: [], jpytwd: [] })
   const [currencyLoading, setCurrencyLoading] = useState(true)
@@ -100,6 +105,31 @@ function App() {
     fetchBitcoin()
   }, [])
 
+  // 取得股市指數資料
+  useEffect(() => {
+    const fetchIndices = async () => {
+      try {
+        setIndicesLoading(true)
+        setIndicesError(null)
+
+        const res = await fetch('/api/specialinfo/indices?days=30')
+        if (!res.ok) throw new Error('無法取得股市指數資料')
+
+        const data = await res.json()
+        setIndicesData({
+          dowjones: data.dowjones || [],
+          nasdaq: data.nasdaq || [],
+        })
+      } catch (err) {
+        setIndicesError(err.message)
+      } finally {
+        setIndicesLoading(false)
+      }
+    }
+
+    fetchIndices()
+  }, [])
+
   // 取得匯率資料
   useEffect(() => {
     const fetchCurrency = async () => {
@@ -125,7 +155,7 @@ function App() {
     fetchCurrency()
   }, [])
 
-  const hasGlobalError = oilError && goldError && bitcoinError && currencyError
+  const hasGlobalError = oilError && goldError && bitcoinError && indicesError && currencyError
 
   return (
     <div className="app">
@@ -183,6 +213,31 @@ function App() {
           showVolume={true}
           loading={bitcoinLoading}
           error={bitcoinError}
+        />
+      </div>
+
+      {/* 股市指數區 */}
+      <div className="section-title">股市指數</div>
+      <div className="card-grid">
+        <PriceCard
+          title="道瓊工業指數"
+          data={indicesData.dowjones}
+          color="#1E88E5"
+          pricePrefix=""
+          decimalPlaces={2}
+          showVolume={false}
+          loading={indicesLoading}
+          error={indicesError}
+        />
+        <PriceCard
+          title="納斯達克指數"
+          data={indicesData.nasdaq}
+          color="#43A047"
+          pricePrefix=""
+          decimalPlaces={2}
+          showVolume={false}
+          loading={indicesLoading}
+          error={indicesError}
         />
       </div>
 

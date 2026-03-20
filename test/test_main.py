@@ -71,3 +71,13 @@ class TestRouteRegistered:
         """匯率最新價格路由應存在。"""
         routes = [r.path for r in app.routes]
         assert "/api/specialinfo/currency/latest" in routes
+
+    def test_indices_route_exists(self, client):
+        """股市指數路由應存在。"""
+        routes = [r.path for r in app.routes]
+        assert "/api/specialinfo/indices" in routes
+
+    def test_indices_latest_route_exists(self, client):
+        """股市指數最新價格路由應存在。"""
+        routes = [r.path for r in app.routes]
+        assert "/api/specialinfo/indices/latest" in routes

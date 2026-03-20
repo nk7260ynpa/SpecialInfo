@@ -7,9 +7,10 @@
 - WTI / Brent 原油價格走勢與最新報價
 - 黃金價格走勢與最新報價
 - 比特幣價格走勢與最新報價
+- 道瓊工業指數 / 納斯達克指數走勢與最新報價
 - 美元/台幣、日圓/台幣匯率走勢與最新報價
 - 收盤價折線圖（近 30 天）
-- 分區卡片式佈局（大宗商品、匯率）
+- 分區卡片式佈局（大宗商品、股市指數、匯率）
 
 ## 專案架構
 
@@ -29,12 +30,14 @@ SpecialInfo/
 │   │   ├── oil.py            # 原油價格 API 路由
 │   │   ├── gold.py           # 黃金價格 API 路由
 │   │   ├── bitcoin.py        # 比特幣價格 API 路由
+│   │   ├── indices.py        # 股市指數 API 路由
 │   │   └── currency.py       # 匯率 API 路由
 │   └── services/
 │       ├── __init__.py
 │       ├── oil_service.py    # 原油價格資料查詢服務
 │       ├── gold_service.py   # 黃金價格資料查詢服務
 │       ├── bitcoin_service.py # 比特幣價格資料查詢服務
+│       ├── indices_service.py # 股市指數資料查詢服務
 │       └── currency_service.py # 匯率資料查詢服務
 ├── frontend/
 │   ├── package.json
@@ -54,6 +57,7 @@ SpecialInfo/
 │   ├── test_oil.py           # 原油 API 測試
 │   ├── test_gold.py          # 黃金 API 測試
 │   ├── test_bitcoin.py       # 比特幣 API 測試
+│   ├── test_indices.py       # 股市指數 API 測試
 │   └── test_currency.py      # 匯率 API 測試
 ├── logs/
 │   └── .gitkeep
@@ -112,6 +116,8 @@ pytest test/ -v
 | GET | `/api/specialinfo/gold/latest` | 查詢最新一筆黃金價格 |
 | GET | `/api/specialinfo/bitcoin?days=30` | 查詢最近 N 天比特幣價格，days 範圍 1-365 |
 | GET | `/api/specialinfo/bitcoin/latest` | 查詢最新一筆比特幣價格 |
+| GET | `/api/specialinfo/indices?days=30` | 查詢最近 N 天股市指數（DowJones + Nasdaq），days 範圍 1-365 |
+| GET | `/api/specialinfo/indices/latest` | 查詢最新一筆股市指數（DowJones + Nasdaq） |
 | GET | `/api/specialinfo/currency?days=30` | 查詢最近 N 天匯率（USDTWD + JPYTWD），days 範圍 1-365 |
 | GET | `/api/specialinfo/currency/latest` | 查詢最新一筆匯率（USDTWD + JPYTWD） |
 
@@ -182,6 +188,35 @@ pytest test/ -v
 }
 ```
 
+#### GET /api/specialinfo/indices?days=7
+
+```json
+{
+  "dowjones": [
+    {
+      "date": "2026-03-01",
+      "product": "DowJones",
+      "open": 41500.00,
+      "high": 42000.00,
+      "low": 41400.00,
+      "close": 41985.35,
+      "volume": 0
+    }
+  ],
+  "nasdaq": [
+    {
+      "date": "2026-03-01",
+      "product": "Nasdaq",
+      "open": 17800.00,
+      "high": 18100.00,
+      "low": 17750.00,
+      "close": 18012.50,
+      "volume": 0
+    }
+  ]
+}
+```
+
 #### GET /api/specialinfo/currency?days=7
 
 ```json
@@ -242,6 +277,7 @@ pytest test/ -v
 - **Table**: `OilPrice` — 原油價格（WTI / Brent）
 - **Table**: `GoldPrice` — 黃金價格（Gold）
 - **Table**: `BitcoinPrice` — 比特幣價格（Bitcoin）
+- **Table**: `IndicesPrice` — 股市指數（DowJones / Nasdaq）
 - **Table**: `CurrencyPrice` — 匯率（USDTWD / JPYTWD）
 
 各 Table 欄位相同：
