@@ -12,6 +12,7 @@ docker rm -f "$CONTAINER_NAME" 2>/dev/null || true
 
 docker run -d \
   --name "$CONTAINER_NAME" \
+  --restart=always \
   --network db_network \
   -p 5055:5055 \
   -v "$SCRIPT_DIR/logs:/app/logs" \
