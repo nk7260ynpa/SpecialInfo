@@ -3,6 +3,14 @@ import OilPriceCard from './components/OilPriceCard'
 import PriceCard from './components/PriceCard'
 import './App.css'
 
+// 組合 API 路徑，將 Vite base URL 前綴加到 API path 上，
+// 讓服務可以同時在根路徑 `/` 以及 Dashboard 反向代理
+// `/app/specialinfo/` 下正確運作。
+const apiUrl = (path) => {
+  const base = import.meta.env.BASE_URL.replace(/\/$/, '')
+  return `${base}${path}`
+}
+
 function App() {
   // 原油
   const [oilData, setOilData] = useState({ wti: [], brent: [] })
@@ -38,8 +46,8 @@ function App() {
         setOilError(null)
 
         const [pricesRes, latestRes] = await Promise.all([
-          fetch('/api/specialinfo/oil?days=30'),
-          fetch('/api/specialinfo/oil/latest'),
+          fetch(apiUrl('/api/specialinfo/oil?days=30')),
+          fetch(apiUrl('/api/specialinfo/oil/latest')),
         ])
 
         if (!pricesRes.ok || !latestRes.ok) {
@@ -68,7 +76,7 @@ function App() {
         setGoldLoading(true)
         setGoldError(null)
 
-        const res = await fetch('/api/specialinfo/gold?days=30')
+        const res = await fetch(apiUrl('/api/specialinfo/gold?days=30'))
         if (!res.ok) throw new Error('無法取得黃金價格資料')
 
         const data = await res.json()
@@ -90,7 +98,7 @@ function App() {
         setBitcoinLoading(true)
         setBitcoinError(null)
 
-        const res = await fetch('/api/specialinfo/bitcoin?days=30')
+        const res = await fetch(apiUrl('/api/specialinfo/bitcoin?days=30'))
         if (!res.ok) throw new Error('無法取得比特幣價格資料')
 
         const data = await res.json()
@@ -112,7 +120,7 @@ function App() {
         setIndicesLoading(true)
         setIndicesError(null)
 
-        const res = await fetch('/api/specialinfo/indices?days=30')
+        const res = await fetch(apiUrl('/api/specialinfo/indices?days=30'))
         if (!res.ok) throw new Error('無法取得股市指數資料')
 
         const data = await res.json()
@@ -137,7 +145,7 @@ function App() {
         setCurrencyLoading(true)
         setCurrencyError(null)
 
-        const res = await fetch('/api/specialinfo/currency?days=30')
+        const res = await fetch(apiUrl('/api/specialinfo/currency?days=30'))
         if (!res.ok) throw new Error('無法取得匯率資料')
 
         const data = await res.json()

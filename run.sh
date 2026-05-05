@@ -14,8 +14,7 @@ docker run -d \
   --name "$CONTAINER_NAME" \
   --restart=always \
   --network db_network \
-  -p 5055:5055 \
   -v "$SCRIPT_DIR/logs:/app/logs" \
   "$IMAGE_NAME"
 
-echo "SpecialInfo Dashboard started at http://localhost:5055"
+echo "SpecialInfo Dashboard started (internal only, accessible via db_network as tw-stock-specialinfo:5055)"

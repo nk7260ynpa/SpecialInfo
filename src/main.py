@@ -31,7 +31,16 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-app = FastAPI(title="特殊資訊 Dashboard", version="1.0.0")
+# Dashboard 反向代理（`/app/specialinfo/`）在轉發前已將前綴剝除，
+# 後端收到的請求路徑不含前綴，因此 root_path 預設為空字串。
+# 若有需要（例如 OpenAPI docs 帶上前綴）可透過 env var 指定 `/app/specialinfo`。
+ROOT_PATH = os.environ.get("ROOT_PATH", "")
+
+app = FastAPI(
+    title="特殊資訊 Dashboard",
+    version="1.0.0",
+    root_path=ROOT_PATH,
+)
 
 # 註冊 API 路由
 app.include_router(oil_router)
