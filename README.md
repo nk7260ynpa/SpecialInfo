@@ -314,9 +314,22 @@ pytest test/ -v
 本專案以自架 GitLab 為開發主線，GitHub 作為對外鏡像：
 
 - **雙 remote**：`origin` 指向 GitLab（預設推送目標），`github` 指向 GitHub。
-- **鏡像管線**（`.gitlab-ci.yml`）：feature 分支開 Merge Request 合併進 `main` **不會**
-  立即鏡像；需在 `main` 打上 `vX.Y.Z` 版本 tag，才會於該 tag 觸發 `mirror-to-github`，
-  將 `main` 與該版本 tag 一併推送（鏡像）到 GitHub。
-- **認證**：SSH 私鑰由 GitLab Runner 注入，名稱 `GITHUB_SSH_KEY`（其值可為金鑰檔路徑
-  或金鑰內容，管線兩者皆支援）；對應公鑰需加到 GitHub repo → Settings → Deploy keys
+- **觸發條件**：feature 分支開 Merge Request 合併進 `main` **不會**觸發管線；需在 `main`
+  打上 `vX.Y.Z` 版本 tag，`.gitlab-ci.yml` 才會於該 tag 觸發（`$CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/`）。
+- **管線含兩個 stage，互不相依、並行**（皆 `needs: []`）：
+  - **`deploy`（host 本地重新部署）**：GitLab Runner 為 docker executor 並掛載
+    `/var/run/docker.sock`，job 內 `docker` 指令直接作用在 host daemon（等同手動跑
+    `docker/build.sh` + `run.sh`）。嚴格依 **build → `rm -f` → run** 順序：先以
+    `docker/Dockerfile` build 出 `nk7260ynpa/tw_stock_specialinfo:<版本>` 與 `:latest`
+    兩個 tag（**build 失敗即中止、舊容器不動、服務不中斷**），再移除舊容器並以
+    `--restart=always --network db_network` 啟動新容器，掛**具名 volume**
+    `tw-stock-specialinfo_logs:/app/logs`，最後清理懸空 image。
+  - **`mirror-to-github`（鏡像）**：將 `main` 與該版本 tag 一併推送（鏡像）到 GitHub。
+- **認證（mirror）**：SSH 私鑰由 GitLab Runner 注入，名稱 `GITHUB_SSH_KEY`（其值可為金鑰
+  檔路徑或金鑰內容，管線兩者皆支援）；對應公鑰需加到 GitHub repo → Settings → Deploy keys
   並勾選 Allow write access。
+
+> **查 CI 部署的容器 log**：CI `deploy` 啟動的容器其 log 落在**具名 volume**
+> `tw-stock-specialinfo_logs`（非 repo 內的 `logs/`，因 CI 環境無 repo 工作目錄可掛載）。
+> 查 log 請用 `docker logs tw-stock-specialinfo`，**不要**去翻 repo 的 `logs/`。手動跑
+> `run.sh` 時則仍是 bind mount 到 repo 的 `logs/`。
