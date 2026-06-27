@@ -308,3 +308,15 @@ pytest test/ -v
 - **部署**: Docker (multi-stage build)
 - **網路**: Docker `db_network`
 - **Port**: 5055
+
+## CI/CD 與 Git Remote
+
+本專案以自架 GitLab 為開發主線，GitHub 作為對外鏡像：
+
+- **雙 remote**：`origin` 指向 GitLab（預設推送目標），`github` 指向 GitHub。
+- **鏡像管線**（`.gitlab-ci.yml`）：feature 分支開 Merge Request 合併進 `main` **不會**
+  立即鏡像；需在 `main` 打上 `vX.Y.Z` 版本 tag，才會於該 tag 觸發 `mirror-to-github`，
+  將 `main` 與該版本 tag 一併推送（鏡像）到 GitHub。
+- **認證**：SSH 私鑰由 GitLab Runner 注入，名稱 `GITHUB_SSH_KEY`（其值可為金鑰檔路徑
+  或金鑰內容，管線兩者皆支援）；對應公鑰需加到 GitHub repo → Settings → Deploy keys
+  並勾選 Allow write access。
